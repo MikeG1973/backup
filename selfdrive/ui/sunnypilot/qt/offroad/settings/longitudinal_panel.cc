@@ -8,6 +8,21 @@
 #include "selfdrive/ui/sunnypilot/qt/offroad/settings/longitudinal_panel.h"
 
 LongitudinalPanel::LongitudinalPanel(QWidget *parent) : QWidget(parent) {
+  setStyleSheet(R"(
+    #back_btn {
+      font-size: 50px;
+      margin: 0px;
+      padding: 15px;
+      border-width: 0;
+      border-radius: 30px;
+      color: #dddddd;
+      background-color: #393939;
+    }
+    #back_btn:pressed {
+      background-color:  #4a4a4a;
+    }
+  )");
+
   main_layout = new QStackedLayout(this);
   ListWidget *list = new ListWidget(this, false);
 
@@ -22,6 +37,12 @@ LongitudinalPanel::LongitudinalPanel(QWidget *parent) : QWidget(parent) {
   list->addItem(customAccIncrement);
 
   QObject::connect(uiState(), &UIState::offroadTransition, this, &LongitudinalPanel::refresh);
+
+  visionTurnSpeedControl = new ParamControlSP("VisionTurnSpeedControl",
+    tr("Vision Turn Speed Controller"),
+    tr("Also known as V-TSC, this controller automatically slows down for curvature while OP longitudinal is engaged."),
+    "../assets/offroad/icon_shell.png");
+  list->addItem(visionTurnSpeedControl);
 
   main_layout->addWidget(cruisePanelScreen);
   main_layout->setCurrentWidget(cruisePanelScreen);
