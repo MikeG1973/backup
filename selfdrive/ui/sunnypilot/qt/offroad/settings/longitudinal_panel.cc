@@ -38,13 +38,40 @@ LongitudinalPanel::LongitudinalPanel(QWidget *parent) : QWidget(parent) {
 
   QObject::connect(uiState(), &UIState::offroadTransition, this, &LongitudinalPanel::refresh);
 
+  dynamicExperimentalControl = new ParamControlSP("DynamicExperimentalControl",
+    tr("Enable Dynamic Experimental Control"),
+    tr("Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal."),
+    "../assets/offroad/icon_blank.png");
+  list->addItem(dynamicExperimentalControl);
+  PushButtonSP *decManageRectBtn = new PushButtonSP(tr("Customize DEC"), 800, this);
+  list->addItem(decManageRectBtn);
+
+  connect(decManageRectBtn, &QPushButton::clicked, [=]() {
+    cruisePanelScroller->setLastScrollPosition();
+    main_layout->setCurrentWidget(decScreen);
+  });
+
+  connect(dynamicExperimentalControl, &ParamControlSP::toggleFlipped, [=](bool enabled) {
+    decManageRectBtn->setVisible(enabled);
+  });
+
+  bool decEnabled = params.getBool("DynamicExperimentalControl");
+  decManageRectBtn->setVisible(decEnabled);
+
   visionTurnSpeedControl = new ParamControlSP("VisionTurnSpeedControl",
     tr("Vision Turn Speed Controller"),
     tr("Also known as V-TSC, this controller automatically slows down for curvature while OP longitudinal is engaged."),
     "../assets/offroad/icon_shell.png");
   list->addItem(visionTurnSpeedControl);
 
+  decScreen = new DecControllerSubpanel(this);
+  connect(decScreen, &DecControllerSubpanel::backPress, [=]() {
+    cruisePanelScroller->restoreScrollPosition();
+    main_layout->setCurrentWidget(cruisePanelScreen);
+  });
+
   main_layout->addWidget(cruisePanelScreen);
+  main_layout->addWidget(decScreen);
   main_layout->setCurrentWidget(cruisePanelScreen);
   refresh(offroad);
 }
@@ -95,6 +122,12 @@ void LongitudinalPanel::refresh(bool _offroad) {
   // enable toggle when long is available and is not PCM cruise
   customAccIncrement->setEnabled(has_longitudinal_control && !is_pcm_cruise && !offroad);
   customAccIncrement->refresh();
+
+  // Refresh DEC manage button
+  if (decManageBtn) {
+    bool decEnabled = params.getBool("DynamicExperimentalControl");
+    decManageBtn->setVisible(decEnabled);
+  }
 
   offroad = _offroad;
 }

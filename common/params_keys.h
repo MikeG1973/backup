@@ -196,7 +196,17 @@ inline static std::unordered_map<std::string, uint32_t> keys = {
     {"LongTuningMinUpperJerk", PERSISTENT | BACKUP},
     {"LongTuningMinLowerJerk", PERSISTENT | BACKUP},
 
+    // Dynamic Experimental Controller
     {"DynamicExperimentalControl", PERSISTENT | BACKUP},
+    {"DynamicExperimentalStandstill", PERSISTENT | BACKUP},
+    {"DynamicExperimentalModelSlowDown", PERSISTENT | BACKUP},
+    {"DynamicExperimentalCurvature", PERSISTENT | BACKUP},
+    {"DynamicExperimentalHasLead", PERSISTENT | BACKUP},
+    {"DynamicExperimentalDistanceBased", PERSISTENT | BACKUP},
+    {"DynamicExperimentalDistanceValue", PERSISTENT | BACKUP},
+    {"DynamicExperimentalSpeedBased", PERSISTENT | BACKUP},
+    {"DynamicExperimentalSpeedValue", PERSISTENT | BACKUP},
+    {"DynamicExperimentalSlowness", PERSISTENT | BACKUP},
     {"BlindSpot", PERSISTENT | BACKUP},
 
     // model panel params
