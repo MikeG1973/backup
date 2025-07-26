@@ -47,6 +47,7 @@ def manager_init() -> None:
   sunnypilot_default_params: list[tuple[str, str | bytes]] = [
     ("sunnypilot_ui", "1"), # Use sunnypilot UI for raylib. Disable to use stock.
 
+    ("AccelPersonality", "1"),
     ("AutoLaneChangeTimer", "0"),
     ("AutoLaneChangeBsmDelay", "0"),
     ("BlindSpot", "0"),
@@ -77,6 +78,10 @@ def manager_init() -> None:
     ("QuietMode", "0"),
     ("RainbowMode", "0"),
     ("ShowAdvancedControls", "0" if build_metadata.tested_channel else "1"),
+    ("VibePersonalityEnabled", "0"),
+    ("VibeAccelPersonalityEnabled", "0"),
+    ("VibeFollowPersonalityEnabled", "0"),
+
     ("VisionTurnSpeedControl", "1"),
 
     # Dynamic Experimental Controller
