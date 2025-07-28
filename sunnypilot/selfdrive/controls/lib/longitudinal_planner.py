@@ -7,6 +7,7 @@ See the LICENSE.md file in the root directory for more details.
 
 from cereal import messaging, custom
 from opendbc.car import structs
+from openpilot.common.realtime import DT_CTRL
 from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot.selfdrive.controls.lib.dec.dec import DynamicExperimentalController
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit_controller.speed_limit_controller import SpeedLimitController
@@ -21,7 +22,11 @@ DecState = custom.LongitudinalPlanSP.DynamicExperimentalControl.DynamicExperimen
 class LongitudinalPlannerSP:
   def __init__(self, CP: structs.CarParams, mpc):
     self.events_sp = EventsSP()
-
+    self._transition_counter = 0
+    self._transition_steps = int(0.5 / DT_CTRL)
+    self._last_mode = 'acc'
+    self._transition_from_accel = 0.0
+    self._transition_to_accel = 0.0
     self.dec = DynamicExperimentalController(CP, mpc)
     self.vibe_controller = VibePersonalityController()
     self.v_tsc = VisionTurnController(CP)
@@ -59,6 +64,29 @@ class LongitudinalPlannerSP:
 
     v_cruise_final = min(cruise_speeds)
     return v_cruise_final
+
+  def should_bypass_transition(self):
+    try:
+      return self.dec._endpoint_x < self.dec._expected_distance * 0.7
+    except (AttributeError, TypeError):
+      return False
+
+  def blend_accel_transition(self, mpc_accel, e2e_accel, mode):
+    if mode != self._last_mode:
+      self._transition_counter = 0
+      self._transition_from_accel = mpc_accel if self._last_mode == 'acc' else e2e_accel
+      self._transition_to_accel = e2e_accel if mode == 'blended' else mpc_accel
+      self._last_mode = mode
+
+    if self.should_bypass_transition():
+      self._transition_counter = self._transition_steps
+
+    if self._transition_counter < self._transition_steps:
+      alpha = self._transition_counter / self._transition_steps
+      self._transition_counter += 1
+      return (1 - alpha) * self._transition_from_accel + alpha * self._transition_to_accel
+
+    return e2e_accel if mode == 'blended' else mpc_accel
 
   def update(self, sm: messaging.SubMaster) -> None:
     self.dec.update(sm)
