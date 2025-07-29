@@ -7,7 +7,7 @@ See the LICENSE.md file in the root directory for more details.
 
 from cereal import messaging, custom
 from opendbc.car import structs
-from openpilot.common.realtime import DT_CTRL
+from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot.selfdrive.controls.lib.dec.dec import DynamicExperimentalController
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit_controller.speed_limit_controller import SpeedLimitController
@@ -23,7 +23,7 @@ class LongitudinalPlannerSP:
   def __init__(self, CP: structs.CarParams, mpc):
     self.events_sp = EventsSP()
     self._transition_counter = 0
-    self._transition_steps = int(0.5 / DT_CTRL)
+    self._transition_steps = int(0.5 / DT_MDL)
     self._last_mode = 'acc'
     self._transition_from_accel = 0.0
     self._transition_to_accel = 0.0
